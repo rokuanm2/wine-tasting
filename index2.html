@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>오늘의 와인 소개</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap">
+<style>
+  :root {
+    box-sizing: border-box;
+    --bg: #faf6ec;
+    --bg-card: #ffffff;
+    --bg-card-dashed: #fbf1dd;
+    --ink: #2c1810;
+    --ink-soft: #5a4536;
+    --ink-faint: #8a7360;
+    --line: #e7dcc6;
+    --wine: #8a2846;
+    --wine-deep: #6a1c36;
+    --gold: #b9893a;
+    --gold-soft: #d9b46b;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  :root:not([data-theme="light"]) {
+    @media (prefers-color-scheme: dark) {
+      --bg: #221713;
+      --bg-card: #2d201a;
+      --bg-card-dashed: #2a2119;
+      --ink: #f1e7da;
+      --ink-soft: #cdb9a5;
+      --ink-faint: #9c8873;
+      --line: #42342a;
+      --wine: #e0708c;
+      --wine-deep: #d3607e;
+      --gold: #e0bb74;
+      --gold-soft: #ecd29c;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #221713;
+    --bg-card: #2d201a;
+    --bg-card-dashed: #2a2119;
+    --ink: #f1e7da;
+    --ink-soft: #cdb9a5;
+    --ink-faint: #9c8873;
+    --line: #42342a;
+    --wine: #e0708c;
+    --wine-deep: #d3607e;
+    --gold: #e0bb74;
+    --gold-soft: #ecd29c;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-weight: 400;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3 { font-family: 'Nanum Myeongjo', serif; font-weight: 700; color: var(--ink); margin: 0; }
+  p { margin: 0 0 14px; font-size: 16px; color: var(--ink-soft); }
+  strong { color: var(--ink); font-weight: 600; }
+
+  header.hero { padding: 56px 24px 28px; text-align: left; }
+  .eyebrow { font-size: 13px; letter-spacing: 2px; color: var(--gold); font-weight: 600; margin-bottom: 10px; }
+  h1.title { font-size: 34px; line-height: 1.25; margin-bottom: 14px; }
+  .lede { font-size: 16px; color: var(--ink-soft); max-width: 46ch; }
+
+  nav.tabs {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    gap: 10px;
+    padding: 14px 20px;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--gold-soft);
+  }
+  nav.tabs button {
+    flex: 1;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--wine-deep);
+    background: rgba(185, 137, 58, 0.06);
+    border: 1px solid var(--gold-soft);
+    border-radius: 14px;
+    padding: 12px 8px;
+    cursor: pointer;
+    transition: background .15s ease, color .15s ease;
+  }
+  nav.tabs button.active {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: #fff;
+  }
+
+  main { max-width: 640px; margin: 0 auto; padding: 0 20px 80px; }
+
+  .panel { display: none; padding-top: 28px; }
+  .panel.active { display: block; }
+
+  .kicker { font-size: 13px; letter-spacing: 2px; color: var(--gold); font-weight: 700; margin-bottom: 8px; }
+  h2.panel-title { font-size: 26px; line-height: 1.3; margin-bottom: 8px; }
+  .panel-sub { font-size: 15px; color: var(--ink-faint); margin-bottom: 22px; }
+
+  .variety-card, .wine-card {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 14px;
+  }
+  .variety-card h3, .wine-card h3 { font-size: 18px; margin-bottom: 6px; }
+  .variety-card p, .wine-card p { font-size: 15px; margin-bottom: 0; }
+  .wine-card .meta { font-size: 13px; color: var(--gold); font-weight: 600; margin-bottom: 8px; display: block; }
+  .wine-card p + p { margin-top: 10px; }
+
+  .wine-card.placeholder { background: var(--bg-card-dashed); border: 1px dashed var(--gold-soft); }
+  .wine-card.placeholder h3 { color: var(--gold); }
+
+  .note {
+    margin-top: 14px;
+    padding: 14px 16px;
+    background: var(--bg-card-dashed);
+    border-left: 3px solid var(--gold);
+    border-radius: 0 10px 10px 0;
+    font-size: 14px;
+    color: var(--ink-faint);
+  }
+  .note p { font-size: 14px; color: var(--ink-faint); margin: 0; }
+
+  footer { padding: 40px 24px 60px; text-align: center; color: var(--ink-faint); font-size: 14px; }
+  footer .cheers { font-family: 'Nanum Myeongjo', serif; font-size: 22px; color: var(--wine); margin-bottom: 8px; }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="eyebrow">WINE TASTING NIGHT</div>
+  <h1 class="title">오늘의 와인 소개</h1>
+  <p class="lede">품종을 가볍게 훑고, 화이트부터 레드까지 편하게 둘러보세요.</p>
+</header>
+
+<nav class="tabs">
+  <button class="active" data-tab="variety" onclick="showTab('variety', this)">🍇 품종</button>
+  <button data-tab="white" onclick="showTab('white', this)">🥂 화이트</button>
+  <button data-tab="red" onclick="showTab('red', this)">🍷 레드</button>
+</nav>
+
+<main>
+
+  <!-- ===== 품종 가이드 ===== -->
+  <section class="panel active" id="panel-variety">
+    <h2 class="panel-title">오늘의 품종 미니 가이드</h2>
+    <p class="panel-sub">와인 맛의 8할은 품종에서 갈려요. 화이트 → 가벼운 레드 → 묵직한 레드 순서로 정리했어요.</p>
+
+    <div class="variety-card">
+      <h3>소비뇽 블랑 Sauvignon Blanc</h3>
+      <p>이름 자체가 "거친/야생의 흰(포도)"라는 뜻의 프랑스어예요. 가장 직관적인 시그니처 향은 단연 <strong>풀 깎은 향</strong> — 잔디를 막 깎았을 때 나는 풋풋한 향이라 누구나 한 모금이면 알아챌 수 있어요. 산도가 뾰족해서 해산물·염소치즈 같은 새콤한 음식과 특히 잘 어울려요.</p>
+    </div>
+    <div class="variety-card">
+      <h3>산지오베제 Sangiovese</h3>
+      <p>이탈리아에서 가장 많이 심는 품종이자 토스카나의 심장. 이름은 라틴어로 "제우스의 피"라는 뜻으로, 이탈리아인들이 사랑하는 품종이에요. 가장 직관적인 시그니처 향은 <strong>새콤한 체리향</strong> — 잘 익은 체리보다는 살짝 시큼한 붉은 체리·자두 향에 상큼한 산미가 특징이고, 토마토소스 요리와 유독 궁합이 좋아요.</p>
+    </div>
+    <div class="variety-card">
+      <h3>네비올로 Nebbiolo</h3>
+      <p>이탈리아 와인의 왕, 바롤로·바르바레스코를 만드는 품종. 이름은 "안개(nebbia)"에서 왔어요. 가장 직관적인 시그니처 향은 <strong>마른 장미향</strong> — 생화보다 바싹 마른 꽃 느낌의 장미향에 타르 같은 뉘앙스가 겹치는 게 네비올로만의 개성이에요. 색은 의외로 옅지만 타닌·산도가 매우 강한 "가벼워 보이는데 한 방 있는" 반전 매력이 있어요.</p>
+    </div>
+    <div class="variety-card">
+      <h3>템프라니요 Tempranillo</h3>
+      <p>스페인의 자존심. 이름은 "이르다"는 뜻의 temprano에서 왔어요. 스페인은 아메리칸 오크를 즐겨 써서 바닐라·코코넛 향이 유독 진하게 배는 게 특징이에요.</p>
+    </div>
+    <div class="variety-card">
+      <h3>그르나슈 Grenache</h3>
+      <p>프랑스 3대 와인 산지 중 하나인 <strong>론(Rhône)</strong> 지방에서, 쉬라·무르베드르와 함께 블렌딩하는 "GSM"의 중심을 잡는 품종이에요. 당도가 높게 올라가 알코올 도수가 높고, 라즈베리·딸기잼 같은 달콤한 과실향이 풍부해요. 100년 넘은 올드 바인에서는 그 자체로도 놀라운 힘과 깊이를 보여줘요.</p>
+    </div>
+    <div class="variety-card">
+      <h3>쉬라즈 Shiraz</h3>
+      <p>후추·감초 향과 진한 색이 특징인 품종이에요. 원래 프랑스 론 지방이 고향이지만, 지금은 누가 뭐래도 <strong>호주를 대표하는 품종</strong>으로 더 유명해요. "호주 와인" 하면 가장 먼저 떠오르는 품종이자, 동시에 호주를 세계 와인 지도에 올려놓은 품종이기도 해요. 2000~2010년대 국내 와인 대중화 시기, 많은 분들이 레드 와인에 처음 빠지게 된 "입문 품종"으로도 잘 알려져 있어요.</p>
+    </div>
+    <div class="variety-card">
+      <h3>진판델 Zinfandel</h3>
+      <p>미국 대표 레드 품종. 드라이한데도 레드 중 <strong>가장 달콤하게 느껴지는 착각</strong>을 주는 걸로 유명해요. 도수도 높은 편(14~15%대)이라 바비큐 같은 강한 맛의 요리와 잘 어울려요.</p>
+    </div>
+    <div class="variety-card">
+      <h3>카베르네 소비뇽 Cabernet Sauvignon</h3>
+      <p>세계에서 가장 많이 심긴 레드 품종이자 "포도의 왕"이라 불려요. 보르도 좌안(메독 등)을 대표하는 품종으로, 블랙커런트·블랙체리 같은 진한 과실향에 두꺼운 껍질에서 나오는 단단한 타닌이 특징이에요. 껍질이 두꺼워 병충해에 강하고 어디서나 잘 자라서, 전 세계 거의 모든 와인 산지에 퍼져 있어요.</p>
+    </div>
+    <div class="variety-card">
+      <h3>말벡 Malbec</h3>
+      <p>색이 짙고 타닌이 부드러워 편하게 마시기 좋은 품종. 원래 프랑스가 주 무대였는데, 19세기 말 필록세라 이후 아르헨티나에서 전성기를 맞았어요. 자세한 이야기는 카오르에서 이어집니다.</p>
+    </div>
+  </section>
+
+  <!-- ===== 화이트 ===== -->
+  <section class="panel" id="panel-white">
+    <h2 class="panel-title">화이트 & 스파클링</h2>
+    <p class="panel-sub">가벼운 순서로 쭉 정리했어요.</p>
+
+    <div class="wine-card">
+      <span class="meta">스페인 · 까바 · 2022</span>
+      <h3>로저 구라트 코랄 로제 Roger Goulart Coral Rose</h3>
+      <p>1882년 설립된 스페인에서 가장 오래된 스파클링 와인 명가 중 하나로, "스페인의 돔 페리뇽"이라 불려요. 실제로 일본의 한 TV 프로그램에서 로저 구라트 로제와 돔 페리뇽 로제를 블라인드로 비교하는 코너가 있었는데, 참가자 5명 중 3명이 로저 구라트 쪽을 돔 페리뇽으로 지목했을 정도로 화제가 됐던 와인이에요. 산뜻한 산도와 붉은 베리 향이 특징이라 웰컴 드링크로 좋습니다.</p>
+      <div class="note"><p>돔 페리뇽은 모엣 샹동이 만드는 최고급 프레스티지 샴페인이에요. 17세기 오빌레 수도원의 수도사 동 페리뇽의 이름을 땄는데, 그가 실제로 샴페인을 "발명"한 건 아니지만 병 숙성 기법을 발전시킨 인물로 알려져 있어요.</p></div>
+    </div>
+    <div class="wine-card placeholder">
+      <h3>추가 까바 2종</h3>
+      <p>선정 예정</p>
+    </div>
+    <div class="wine-card">
+      <span class="meta">뉴질랜드 말버러 · 2022</span>
+      <h3>푸나무 Pounamu</h3>
+      <p>"푸나무"는 마오리어로 뉴질랜드의 상징인 옥(비취)을 뜻해요 — 평화와 화합을 상징하는 귀한 돌이에요. 1985년 설립되어 말버러 스타일을 세상에 처음 알린 와이너리 <strong>클라우디 베이</strong> 출신 수석 와인메이커 에벌린 프레이저가 만든 와인으로, 원조의 계보를 잇고 있어요. 산뜻하고 깔끔한 스타일이에요.</p>
+    </div>
+    <div class="wine-card">
+      <span class="meta">뉴질랜드 말버러 · 2024</span>
+      <h3>러시안 잭 Russian Jack</h3>
+      <p>가상의 캐릭터가 아니라 실존 인물이에요. 1878년 라트비아에서 태어나 1912년 뉴질랜드에 이민 온 그는, 걸쭉한 억양 때문에 "러시안 잭"이라는 별명이 붙었고, 50년 가까이 전국을 떠돌며 농장을 개간하고 과일을 따주던 떠돌이 일꾼으로 전설이 됐어요. 1968년 세상을 떠난 뒤 청동상까지 세워졌죠. 트로피컬 과일 향과 상큼한 산미가 두드러지는 전형적인 스타일이에요.</p>
+      <p>국내에서는 BTS 뷔가 "50병씩 쟁여두고 마신다"고 알려지면서 <strong>"뷔의 그 와인"</strong>으로 화제가 됐고, 하정우도 즐겨 마시는 와인으로 함께 언급되면서 한때 전국 매장에서 품절될 만큼 인기를 끌었어요.</p>
+    </div>
+    <div class="wine-card">
+      <span class="meta">칠레 카사블랑카 밸리 · 샤르도네</span>
+      <h3>코노수르 싱글 빈야드 N°5 Cono Sur</h3>
+      <p>태평양에서 7km 떨어진 칠레에서 가장 서늘한 산지, 카사블랑카 밸리의 싱글 빈야드(Quebrada Alta 블록)에서 나는 포도로 만들어요. 오크 비중이 낮아 산도가 살아있는 시트러스·미네랄 스타일이라, 앞의 소비뇽 블랑들과는 또 다른 결의 "과일 향 중심" 대비를 보여줘요. "코노수르"는 남미 대륙이 아래로 갈수록 뾰족해지는 모양에서 딴 "남쪽의 원뿔"이라는 뜻이고, 자전거로 포도밭을 관리하는 등 일찍부터 친환경 양조에 앞장서 칠레 최초의 탄소중립 와이너리 타이틀을 가진 곳이에요.</p>
+    </div>
+    <div class="wine-card">
+      <span class="meta">뉴질랜드 말버러 · 소비뇽 블랑</span>
+      <h3>커클랜드 시그니처 Kirkland Signature</h3>
+      <p>코스트코의 자체 브랜드(PB) 상품으로, 실제로는 뉴질랜드 와이너리 타이 포인트(Ti Point)에서 OEM으로 만들어요. 국내에서는 배우 하정우가 방송에서 "100병씩 쟁여놓고 마신다"고 말한 뒤로 <strong>"하정우 와인"</strong>이라는 별명이 붙어서, 한동안 코스트코에서 구매 제한이 걸릴 정도로 품절 대란이 났던 와인이에요.</p>
+      <p>와인 평론 사이트들에서 꾸준히 높은 점수를 받고, "레몬라임, 풀 깎은 향, 잘 익은 파인애플이 잔에서 바로 튀어나온다"고 호평했어요. 최근에는 예전의 "화려하고 강렬한" 스타일에서 절제되고 리니어한 스타일로 바뀌는 추세라는 평도 있어요.</p>
+    </div>
+  </section>
+
+  <!-- ===== 레드 ===== -->
+  <section class="panel" id="panel-red">
+    <h2 class="panel-title">레드</h2>
+    <p class="panel-sub">가벼운 순서로 쭉 정리했어요.</p>
+
+    <div class="wine-card">
+      <span class="meta">이탈리아 토스카나 · 산지오베제 · 2024</span>
+      <h3>까스텔라레 Castellare</h3>
+      <p>1970년대 파올로 파네라이가 세운 와이너리예요. 파네라이는 산지오베제 같은 토스카나 토착 품종만으로 세계적 와인을 만들겠다는 고집을 부렸어요. 그 결과 1988년 와인 스펙테이터 올해의 와인 톱 100에서 6위에 오르며, 토착 품종만으로도 세계적 와인을 만들 수 있다는 걸 입증했죠.</p>
+      <p>이 와인의 특징은 라벨에 그려진 새 그림이에요. 1977년부터 매 빈티지마다 다른 새를 그려 넣는 전통인데, 불법 밀렵으로부터 토스카나 희귀 조류를 보호하자는 항의의 의미로 시작했어요(여기 쓰이는 "검은 수탉"은 키안티 클라시코 전체의 공식 상징이기도 해요 — 중세에 피렌체가 굶긴 수탉을 일찍 울려서 시에나보다 넓은 땅을 차지했다는 전설이 있거든요). 실제로 이 와이너리는 살충제 등 합성 화학물질을 전혀 쓰지 않아 새들의 서식지 역할도 하고 있어요.</p>
+    </div>
+    <div class="wine-card">
+      <span class="meta">이탈리아 토스카나 · 끼안티 클라시코 리제르바 · 2022</span>
+      <h3>커클랜드 시그니처 끼안티 클라시코 리제르바 Kirkland Signature</h3>
+      <p>이것도 코스트코 PB 상품인데, 흥미로운 건 생산자가 매년 바뀐다는 점이에요. 고정된 와이너리와 계약하는 대신, 그해그해 가장 좋은 조건의 생산자를 찾아 OEM 계약을 맺는 방식이라, 라벨 뒷면의 생산자명이 해마다 달라져요.</p>
+      <p>앞서 소개한 까스텔라레는 일반 키안티 클라시코인데, 이 와인은 한 단계 위인 <strong>리제르바</strong> 등급이에요. 키안티 클라시코 리제르바는 법적으로 오크 숙성 최소 24개월 + 병 숙성 3개월 이상을 거쳐야 해서, 같은 산지오베제라도 더 오래 묵혀 나온 깊이를 기대할 수 있어요.</p>
+    </div>
+    <div class="wine-card">
+      <span class="meta">호주 바로사밸리 · 쉬라즈 · 2022</span>
+      <h3>토브렉 우드커터스 Torbreck Woodcutters</h3>
+      <p>데이브 파월이 1994년에 처음 세운 와이너리예요. "토브렉"은 파월이 젊은 시절 벌목꾼으로 일했던 스코틀랜드 인버네스 근처 숲의 이름에서 따왔대요. 바로사밸리는 모래 성분이 많은 토양 덕분에 필록세라 피해를 거의 입지 않아서, 세계에서 가장 오래된 쉬라즈 고목이 남아있는 몇 안 되는 산지가 됐어요.</p>
+    </div>
+    <div class="wine-card">
+      <span class="meta">호주 바로사밸리 · 그르나슈 중심 GSM 블렌드 · 2021</span>
+      <h3>파월앤손 Powell &amp; Son</h3>
+      <p>토브렉을 만든 데이브 파월이, 2013년 투자자와의 경영권 분쟁 끝에 회사에서 나온 뒤 아들과 함께 다시 시작한 와이너리예요. 그르나슈를 주축으로 쉬라즈·마타로(무르베드르의 호주식 이름)를 더한 GSM 블렌드로, 100년 넘은 올드 바인(1901년 심은 나무도 있어요)에서 수확했어요. 그르나슈가 달콤한 과실향과 볼륨감을, 쉬라즈가 짙은 색과 스파이시한 구조를, 마타로가 묵직한 타닌과 흙내음 섞인 깊이를 더해줘서 혼자일 때보다 훨씬 복합적이고 짙고 힘 있는 스타일로 완성됩니다.</p>
+      <div class="note"><p>사실 "파월앤손"이라는 이름은 지금은 역사 속으로 사라졌어요. 아들 콜럼과 만들고 싶은 와인 스타일이 서로 달라지면서, 콜럼은 독립해서 자기만의 브랜드를 만들고 있고, 데이브 파월은 같은 땅·같은 와인을 <strong>닐드너 로드(Neldner Road)</strong>라는 이름으로 계속 만들고 있어요.</p></div>
+    </div>
+    <div class="wine-card">
+      <span class="meta">이탈리아 피에몬테 · 네비올로 · 바르바레스코 등급</span>
+      <h3>루카 보시오 바르바레스코 Luca Bosio</h3>
+      <p>1967년 안젤라·에지디오 부부가 세운 랑게의 가족 와이너리예요. 3대손 루카 보시오가 토리노 대학에서 양조학을 전공하고 자연 효모·저황 양조 같은 현대적 기법을 도입해 와이너리를 크게 키웠고, 벨 콜레(Bel Colle) 와이너리를 인수하기도 했어요. 오크 2년+병 6개월 숙성을 거친 100% 네비올로로, 바롤로보다 가볍고 우아하다는 뜻에서 바르바레스코는 흔히 "와인의 여왕"이라 불려요. 장미·향신료·흑연 뉘앙스에 말린 체리·오레가노 향이 겹치는 스타일이에요.</p>
+    </div>
+    <div class="wine-card placeholder">
+      <h3>랑게 네비올로</h3>
+      <p>선정 예정 · 바롤로·바르바레스코보다 숙성 의무가 짧은 캐주얼한 등급이에요.</p>
+    </div>
+    <div class="wine-card">
+      <span class="meta">스페인 리오하 · 템프라니요 · 2015</span>
+      <h3>란 리제르바 Lan Reserva</h3>
+      <p>리오하는 스페인 와인 중 가장 먼저(1991년) 최고 등급 "DOCa"를 받은 지역. "LAN"은 리오하를 구성하는 세 지역(Logroño, Álava, Navarra)의 앞글자를 딴 이름이에요. 스페인은 아메리칸 오크 숙성을 즐겨 써서 바닐라·코코넛 향이 유독 진해요.</p>
+      <p>리오하 등급은 숙성 기간으로 나뉘는데, 크리안자는 총 2년, 리제르바는 총 3년(오크 1년+병 6개월 이상), 그랑 리제르바는 총 5년 숙성이 법으로 정해져 있어요. "리제르바"가 붙으려면 최소 3년은 묵혀야 한다는 뜻이에요.</p>
+    </div>
+    <div class="wine-card">
+      <span class="meta">칠레 마이포밸리 · 카베르네 소비뇽 중심 보르도 블렌드 · 2021</span>
+      <h3>트리플 C Triple C</h3>
+      <p>마이포밸리는 산티아고 남쪽에 자리한, 450년 넘는 역사를 가진 칠레에서 가장 오래되고 가장 명성 높은 와인 산지예요. "남미의 보르도"라고 불릴 만큼 칠레 최고급 레드 와인들이 집중된 곳이에요.</p>
+      <p>트리플 C는 그런 마이포밸리를 대표하는 생산자 산타리타가 만든 와인으로, 카베르네 소비뇽·카베르네 프랑·까르메네르 세 가지를 블렌딩해 "트리플 C"라는 이름이 붙었어요. 2019년 Wine Enthusiast "세계 100대 숙성 와인"에 2014 빈티지가 오르며 국제적으로도 주목받았고, 국내에서도 한동안 프리미엄 칠레 와인의 대표주자로 이름을 알렸던 와인이에요. 세 품종을 따로 양조한 뒤, 프랑스 오크통(새 오크·리유즈 오크 절반씩)에서 17~18개월 숙성을 거쳐 블렌딩하는데, 그 덕에 바닐라·시더(삼나무) 향이 과실향 위에 은은하게 얹혀요.</p>
+    </div>
+    <div class="wine-card">
+      <span class="meta">미국 캘리포니아 · 진판델</span>
+      <h3>네비게이터 Navigator</h3>
+      <p>진판델은 미국 대표 레드 품종으로, 잘 익은 블랙베리·건포도 향과 살짝 스파이시한 여운이 특징이에요. 브랜드를 만든 트레버 시한은 원래 댈러스에서 회계사로 일하던 사람이었는데, 와인 코르크에 적힌 전화번호로 무작정 전화를 걸었던 게 인연이 되어 나파밸리로 이주해 지금의 브랜드를 시작했어요.</p>
+    </div>
+    <div class="wine-card">
+      <span class="meta">미국 캘리포니아 로디 · 카베르네 소비뇽 · 버번 배럴 숙성 · 2022</span>
+      <h3>더 페더럴리스트 카베르네 소비뇽 The Federalist</h3>
+      <p>시카고의 테를라토 와인 그룹이 2012년 "America's Craft Wine"이라는 슬로건으로 만든 브랜드예요. 카베르네 소비뇽 생산량 미국 1위 산지인 로디에서, 위스키를 담았던 버번 오크통에 와인을 재숙성시키는 독특한 방식을 써요. 그 덕에 블랙베리 잼·블랙체리 향에 스모키·카라멜·바닐라 피니시가 더해지는, 와인과 버번 문화가 만난 듯한 개성 있는 스타일이에요.</p>
+    </div>
+    <div class="wine-card">
+      <span class="meta">프랑스 남서부 카오르 · 말벡 · 2020</span>
+      <h3>샤토 외제니 트라디시옹 Château Eugénie Tradition</h3>
+      <p>프랑스에서 유일하게 말벡을 주력으로 삼는 지역, 카오르의 와인이에요. 색이 유독 진해서 중세부터 <strong>"검은 와인(Vin Noir)"</strong>이라 불렸고, 1152년 엘레오노르 다키텐과 잉글랜드 헨리 2세의 결혼 피로연 식탁에도 올랐대요. 러시아 표트르 대제가 정교회 미사주로 선택했을 만큼 유럽 왕실에서 사랑받았죠. 19세기 말 필록세라와 1956년 대서리까지 겹치며 서리에 약한 말벡이 프랑스 전역에서 큰 타격을 입었지만, 카오르만큼은 끝까지 말벡을 지역 정체성으로 지켜냈어요. 아르헨티나 말벡의 뿌리도 바로 이 카오르예요.</p>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="cheers">Cheers</div>
+  <p style="color:var(--ink-faint)">오늘의 와인들 — 즐거운 저녁 되세요</p>
+</footer>
+
+<script>
+  function showTab(name, btn) {
+    document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
+    document.getElementById('panel-' + name).classList.add('active');
+    document.querySelectorAll('nav.tabs button').forEach(function(b){ b.classList.remove('active'); });
+    btn.classList.add('active');
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  }
+</script>
+
+</body>
+</html>
